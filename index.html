@@ -1,0 +1,248 @@
+<title>RentaGo</title>
+<style>
+  :root {
+    --azul-oscuro: #0b2340;
+    --azul: #114b7f;
+    --turquesa: #17a2b8;
+    --arena: #f4ede1;
+    --blanco: #ffffff;
+    --gris-texto: #4a5568;
+    --naranja: #e07a3f;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--arena);
+    color: var(--gris-texto);
+    line-height: 1.6;
+  }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--azul-oscuro);
+    padding: 18px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  nav .logo {
+    color: var(--blanco);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  nav .logo span {
+    color: var(--turquesa);
+  }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 32px;
+  }
+
+  nav ul li a {
+    color: var(--blanco);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  nav ul li a:hover {
+    color: var(--turquesa);
+  }
+
+  .hero {
+    background: linear-gradient(135deg, var(--azul-oscuro), var(--azul));
+    color: var(--blanco);
+    text-align: center;
+    padding: 120px 20px;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    font-weight: 800;
+  }
+
+  .hero p {
+    font-size: 1.25rem;
+    max-width: 640px;
+    margin: 0 auto 36px auto;
+    color: #d6e6f2;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background-color: var(--naranja);
+    color: var(--blanco);
+    padding: 16px 36px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #c96328;
+    transform: translateY(-2px);
+  }
+
+  .servicios {
+    padding: 90px 40px;
+    text-align: center;
+  }
+
+  .servicios h2 {
+    font-size: 2.2rem;
+    color: var(--azul-oscuro);
+    margin-bottom: 12px;
+  }
+
+  .servicios > p {
+    max-width: 600px;
+    margin: 0 auto 50px auto;
+    color: var(--gris-texto);
+  }
+
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  .card {
+    background-color: var(--blanco);
+    border-radius: 14px;
+    padding: 36px 28px;
+    width: 300px;
+    box-shadow: 0 6px 18px rgba(11, 35, 64, 0.08);
+    text-align: left;
+    border-top: 5px solid var(--turquesa);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 26px rgba(11, 35, 64, 0.15);
+  }
+
+  .card .icon {
+    font-size: 2.4rem;
+    margin-bottom: 16px;
+  }
+
+  .card h3 {
+    color: var(--azul-oscuro);
+    font-size: 1.35rem;
+    margin-bottom: 8px;
+  }
+
+  .card .dato {
+    display: inline-block;
+    background-color: var(--arena);
+    color: var(--naranja);
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  .card p.desc {
+    font-size: 0.98rem;
+    color: var(--gris-texto);
+  }
+
+  footer {
+    background-color: var(--azul-oscuro);
+    color: #b9c8d6;
+    text-align: center;
+    padding: 28px 20px;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 600px) {
+    nav {
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px 20px;
+    }
+
+    nav ul {
+      gap: 20px;
+    }
+
+    .hero {
+      padding: 80px 20px;
+    }
+
+    .hero h1 {
+      font-size: 2.2rem;
+    }
+  }
+</style>
+
+<nav id="inicio">
+  <div class="logo">Renta<span>Go</span></div>
+  <ul>
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#como-funciona">Cómo funciona</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <h1>Tu próximo auto rentado, listo antes de aterrizar</h1>
+  <p>RentaGo conecta viajeros con dueños particulares verificados y usa un algoritmo inteligente para emparejarte con el auto ideal según tu tipo de viaje.</p>
+  <a href="#como-funciona" class="btn-primary">Buscar mi auto ideal</a>
+</section>
+
+<section class="servicios" id="como-funciona">
+  <h2>Cómo funciona</h2>
+  <p>Tres formas en que RentaGo hace que rentar un auto en un destino desconocido sea rápido, seguro y a tu medida.</p>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">🏖️</div>
+      <h3>Match Playa</h3>
+      <span class="dato">Desde $28/día</span>
+      <p class="desc">Convertibles y SUVs compactos recomendados por nuestro algoritmo para escapadas costeras, con seguro contra arena y salitre incluido.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🏙️</div>
+      <h3>Match Ciudad</h3>
+      <span class="dato">Desde $22/día</span>
+      <p class="desc">Sedanes y autos compactos ideales para tráfico urbano, con estacionamiento fácil y bajo consumo, verificados por el dueño en persona o digital.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🏔️</div>
+      <h3>Match Off-Road</h3>
+      <span class="dato">Desde $45/día</span>
+      <p class="desc">Camionetas y 4x4 con tracción integral para rutas de montaña o terracería, con contrato digital y asistencia en carretera 24/7.</p>
+    </div>
+  </div>
+</section>
+
+<footer id="contacto">
+  <p>&copy; 2026 RentaGo. Todos los derechos reservados.</p>
+</footer>
