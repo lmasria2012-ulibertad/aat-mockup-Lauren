@@ -174,6 +174,107 @@
     color: var(--gris-texto);
   }
 
+  .duenos {
+    background: linear-gradient(135deg, var(--azul), var(--turquesa));
+    color: var(--blanco);
+    text-align: center;
+    padding: 90px 40px;
+  }
+
+  .duenos h2 {
+    font-size: 2.2rem;
+    margin-bottom: 16px;
+  }
+
+  .duenos p {
+    max-width: 620px;
+    margin: 0 auto 36px auto;
+    color: #e6f4f8;
+    font-size: 1.05rem;
+  }
+
+  .duenos .beneficios {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    max-width: 700px;
+    margin: 0 auto 40px auto;
+  }
+
+  .duenos .beneficio {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .contacto {
+    padding: 90px 40px;
+    text-align: center;
+  }
+
+  .contacto h2 {
+    font-size: 2.2rem;
+    color: var(--azul-oscuro);
+    margin-bottom: 12px;
+  }
+
+  .contacto > p {
+    max-width: 600px;
+    margin: 0 auto 50px auto;
+    color: var(--gris-texto);
+  }
+
+  .contacto form {
+    background-color: var(--blanco);
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 36px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(11, 35, 64, 0.08);
+    border-top: 5px solid var(--turquesa);
+    text-align: left;
+  }
+
+  .contacto label {
+    display: block;
+    font-weight: 600;
+    color: var(--azul-oscuro);
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  .contacto input,
+  .contacto textarea {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border: 1px solid #d8dee6;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--gris-texto);
+    background-color: var(--arena);
+  }
+
+  .contacto input:focus,
+  .contacto textarea:focus {
+    outline: none;
+    border-color: var(--turquesa);
+  }
+
+  .contacto textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .contacto .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
   footer {
     background-color: var(--azul-oscuro);
     color: #b9c8d6;
@@ -243,6 +344,34 @@
   </div>
 </section>
 
-<footer id="contacto">
+<section class="duenos">
+  <h2>¿Tienes un auto?</h2>
+  <p>Convierte tu auto en una fuente de ingresos extra. Publícalo en RentaGo y rentalo a viajeros verificados cuando tú decidas, sin complicaciones.</p>
+  <div class="beneficios">
+    <div class="beneficio">💰 Gana dinero con tu auto parado</div>
+    <div class="beneficio">🛡️ Verificación de identidad de cada arrendatario</div>
+    <div class="beneficio">📄 Contrato digital para cada renta</div>
+  </div>
+  <a href="#contacto" class="btn-primary">Registra tu auto</a>
+</section>
+
+<section class="contacto" id="contacto">
+  <h2>Contacto</h2>
+  <p>¿Tienes dudas o quieres más información sobre RentaGo? Escríbenos y te responderemos pronto.</p>
+  <form>
+    <label for="nombre">Nombre</label>
+    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" placeholder="tu@correo.com" required>
+
+    <label for="mensaje">Mensaje</label>
+    <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos en qué te podemos ayudar" required></textarea>
+
+    <button type="submit" class="btn-primary">Enviar mensaje</button>
+  </form>
+</section>
+
+<footer>
   <p>&copy; 2026 RentaGo. Todos los derechos reservados.</p>
 </footer>
