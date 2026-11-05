@@ -1,0 +1,23 @@
+[
+  {
+    "fecha_inicio": "2026-11-06",
+    "hora_entrega": "09:30",
+    "email": "ana.lopez@example.com",
+    "auto_id": "A1",
+    "estado": "confirmada"
+  },
+  {
+    "fecha_inicio": "2026-11-06",
+    "hora_entrega": "18:00",
+    "email": "carlos.ruiz@example.com",
+    "auto_id": "A2",
+    "estado": "cancelada"
+  },
+  {
+    "fecha_inicio": "2026-11-08",
+    "hora_entrega": "11:00",
+    "email": "maria.perez@example.com",
+    "auto_id": "A3",
+    "estado": "confirmada"
+  }
+]

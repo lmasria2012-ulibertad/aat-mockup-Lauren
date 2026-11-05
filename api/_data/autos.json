@@ -1,0 +1,17 @@
+[
+  {
+    "id": "A1",
+    "direccion": "Av. Insurgentes Sur 1234, Col. Del Valle, CDMX",
+    "telefono": "+52 55 1234 5678"
+  },
+  {
+    "id": "A2",
+    "direccion": "Calle Durango 45, Col. Roma Norte, CDMX",
+    "telefono": "+52 55 2345 6789"
+  },
+  {
+    "id": "A3",
+    "direccion": "Av. Universidad 900, Col. Santa Cruz Atoyac, CDMX",
+    "telefono": "+52 55 3456 7890"
+  }
+]
