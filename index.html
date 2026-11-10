@@ -283,6 +283,93 @@
     font-size: 0.9rem;
   }
 
+  .cotizador {
+    padding: 90px 40px;
+    text-align: center;
+    background-color: var(--blanco);
+  }
+
+  .cotizador h2 {
+    font-size: 2.2rem;
+    color: var(--azul-oscuro);
+    margin-bottom: 12px;
+  }
+
+  .cotizador > p {
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+  }
+
+  .cotizador form {
+    background-color: var(--arena);
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 36px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(11, 35, 64, 0.08);
+    border-top: 5px solid var(--naranja);
+    text-align: left;
+  }
+
+  .cotizador label {
+    display: block;
+    font-weight: 600;
+    color: var(--azul-oscuro);
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  .cotizador select,
+  .cotizador input {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border: 1px solid #d8dee6;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--gris-texto);
+    background-color: var(--blanco);
+  }
+
+  .cotizador .btn-primary {
+    width: 100%;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+  }
+
+  #resultado-cotizacion {
+    margin-top: 24px;
+    font-size: 1rem;
+  }
+
+  #resultado-cotizacion table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  #resultado-cotizacion td {
+    padding: 6px 0;
+    border-bottom: 1px solid #e3dccd;
+  }
+
+  #resultado-cotizacion td:last-child {
+    text-align: right;
+  }
+
+  #resultado-cotizacion .total td {
+    font-weight: 700;
+    color: var(--azul-oscuro);
+    font-size: 1.15rem;
+    border-bottom: none;
+  }
+
+  #resultado-cotizacion .error {
+    color: #b42318;
+    font-weight: 600;
+  }
+
   @media (max-width: 600px) {
     nav {
       flex-direction: column;
@@ -309,6 +396,7 @@
   <ul>
     <li><a href="#inicio">Inicio</a></li>
     <li><a href="#como-funciona">Cómo funciona</a></li>
+    <li><a href="#cotizador">Cotizar</a></li>
     <li><a href="#contacto">Contacto</a></li>
   </ul>
 </nav>
@@ -323,25 +411,44 @@
   <h2>Cómo funciona</h2>
   <p>Tres formas en que RentaGo hace que rentar un auto en un destino desconocido sea rápido, seguro y a tu medida.</p>
   <div class="cards">
-    <div class="card">
+    <div class="card" data-tipo="Match Playa" data-precio="95">
       <div class="icon">🏖️</div>
       <h3>Match Playa</h3>
-      <span class="dato">Desde $28/día</span>
+      <span class="dato">Desde $95 USD/día</span>
       <p class="desc">Convertibles y SUVs compactos recomendados por nuestro algoritmo para escapadas costeras, con seguro contra arena y salitre incluido.</p>
     </div>
-    <div class="card">
+    <div class="card" data-tipo="Match Ciudad" data-precio="70">
       <div class="icon">🏙️</div>
       <h3>Match Ciudad</h3>
-      <span class="dato">Desde $22/día</span>
+      <span class="dato">Desde $70 USD/día</span>
       <p class="desc">Sedanes y autos compactos ideales para tráfico urbano, con estacionamiento fácil y bajo consumo, verificados por el dueño en persona o digital.</p>
     </div>
-    <div class="card">
+    <div class="card" data-tipo="Match Off-Road" data-precio="140">
       <div class="icon">🏔️</div>
       <h3>Match Off-Road</h3>
-      <span class="dato">Desde $45/día</span>
+      <span class="dato">Desde $140 USD/día</span>
       <p class="desc">Camionetas y 4x4 con tracción integral para rutas de montaña o terracería, con contrato digital y asistencia en carretera 24/7.</p>
     </div>
   </div>
+</section>
+
+<section class="cotizador" id="cotizador">
+  <h2>Cotiza tu renta</h2>
+  <p>Elige tu tipo de auto y tus fechas, y te mostramos cuánto vas a pagar en total, sin sorpresas.</p>
+  <form id="form-cotizador">
+    <label for="tipo-auto">Tipo de auto</label>
+    <select id="tipo-auto" required></select>
+
+    <label for="fecha-inicio">Fecha de inicio</label>
+    <input type="date" id="fecha-inicio" required>
+
+    <label for="fecha-fin">Fecha de fin</label>
+    <input type="date" id="fecha-fin" required>
+
+    <button type="submit" class="btn-primary">Calcular total</button>
+
+    <div id="resultado-cotizacion" aria-live="polite"></div>
+  </form>
 </section>
 
 <section class="duenos">
@@ -375,3 +482,61 @@
 <footer>
   <p>&copy; 2026 RentaGo. Todos los derechos reservados.</p>
 </footer>
+
+<script>
+  // Cotizador de RentaGo
+  // Datos: el precio por día sale de las tarjetas de "Cómo funciona" (data-precio).
+  var SEGURO_POR_DIA = 25;   // USD por día
+  var COMISION = 0.10;      // 10% sobre el subtotal de la renta
+
+  var tarjetas = document.querySelectorAll('.card[data-precio]');
+  var selectAuto = document.getElementById('tipo-auto');
+  tarjetas.forEach(function (t) {
+    var op = document.createElement('option');
+    op.value = t.dataset.precio;
+    op.textContent = t.dataset.tipo + ' ($' + t.dataset.precio + ' USD/día)';
+    selectAuto.appendChild(op);
+  });
+
+  function aFechaUTC(valor) {
+    var p = valor.split('-');
+    return Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  }
+
+  function usd(n) {
+    return '$' + n.toFixed(2) + ' USD';
+  }
+
+  function calcularCotizacion(precioDia, inicio, fin) {
+    var dias = Math.round((aFechaUTC(fin) - aFechaUTC(inicio)) / 86400000);
+    if (dias < 1) {
+      return { error: 'La fecha de fin debe ser posterior a la fecha de inicio.' };
+    }
+    var subtotal = dias * precioDia;
+    var seguro = dias * SEGURO_POR_DIA;
+    var comision = subtotal * COMISION;
+    return { dias: dias, subtotal: subtotal, seguro: seguro, comision: comision, total: subtotal + seguro + comision };
+  }
+
+  document.getElementById('form-cotizador').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var salida = document.getElementById('resultado-cotizacion');
+    var precioDia = Number(selectAuto.value);
+    var inicio = document.getElementById('fecha-inicio').value;
+    var fin = document.getElementById('fecha-fin').value;
+    var r = calcularCotizacion(precioDia, inicio, fin);
+
+    if (r.error) {
+      salida.innerHTML = '<p class="error">' + r.error + '</p>';
+      return;
+    }
+    salida.innerHTML =
+      '<table>' +
+      '<tr><td>Días de renta</td><td>' + r.dias + '</td></tr>' +
+      '<tr><td>Subtotal (' + r.dias + ' × $' + precioDia + ')</td><td>' + usd(r.subtotal) + '</td></tr>' +
+      '<tr><td>Seguro ($' + SEGURO_POR_DIA + '/día)</td><td>' + usd(r.seguro) + '</td></tr>' +
+      '<tr><td>Comisión RentaGo (10%)</td><td>' + usd(r.comision) + '</td></tr>' +
+      '<tr class="total"><td>Total</td><td>' + usd(r.total) + '</td></tr>' +
+      '</table>';
+  });
+</script>
