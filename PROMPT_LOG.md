@@ -9,7 +9,7 @@
 ## Paso 1 — Especificación (Checkpoint A, S19)
 
 Funciones candidatas que consideré: (1) cotizador de renta, (2) buscador/filtro de autos, (3) precio con API de tipo de cambio.
-**Elegí:** el cotizador de renta, porque ___ ✍️
+**Elegí:** el cotizador de renta, porque siento que es la opción más realista: es lo primero que alguien quiere saber antes de rentar un auto (cuánto va a pagar en total).
 
 **1. Qué hace**
 El usuario elige un tipo de auto (Match Playa, Match Ciudad o Match Off-Road), una fecha de inicio y una fecha de fin. Al dar clic en "Calcular total", la app muestra: número de días, subtotal (días × precio por día), seguro ($25 USD por día), comisión de RentaGo (10% del subtotal) y el total en USD. Si la fecha de fin no es posterior a la de inicio, muestra un mensaje de error en lugar del cálculo.
@@ -33,46 +33,40 @@ Herramienta: Claude (chat). Prompt principal: "Programa el cotizador en mi index
 Mientras construía, la IA tomó decisiones que **no estaban en mi especificación**:
 
 **Decisión 1 — Moneda** (campo en juego: *Qué datos necesita*)
-- La IA propuso: un seguro de $5 por día. Yo pensé que era en pesos y no me hacía sentido.
-- La IA aclaró que había asumido dólares porque mi mockup dice "$28/día", y me dio a elegir entre dólares (dejar el mockup igual) o pesos (cambiar todos los precios).
-- **Mi decisión:** Revisar → me quedé con dólares. **Por qué:** ___ ✍️
+- La IA propuso un seguro de $5 por día. Yo lo leí en pesos y le dije que no tenía coherencia ($5 pesos al día de seguro no tiene sentido).
+- La IA aclaró que había asumido dólares porque mi mockup decía "$28/día", y me dio a elegir: dólares (dejar el mockup igual) o pesos (cambiar todos los precios).
+- **Mi decisión:** Revisar → me quedé con **dólares**. **Por qué:** una vez aclarado que eran dólares, $5 sí tenía sentido y no hacía falta cambiar la moneda de toda la app.
 
 **Decisión 2 — Precios no realistas** (campo en juego: *Qué datos necesita*)
-- El mockup y la primera versión del cotizador usaban Ciudad $22, Playa $28, Off-Road $45 y seguro $5/día. La IA propuso subirlos a $45 / $65 / $95 y $15 de seguro.
-- **Mi decisión:** Rechazar → pedí precios más altos y quedaron en Ciudad $70, Playa $95, Off-Road $140 y seguro $25/día. **Por qué:** ___ ✍️
-
-**Decisión 2b — "Desde $X/día" usado como precio exacto** (campo en juego: *Qué datos necesita*)
-- La IA propuso: tomar el precio "Desde $X/día" de las tarjetas como el precio por día del cálculo.
-- **Mi decisión:** Aceptar / Rechazar / Revisar ___ **Por qué:** ___ ✍️
-
-**Decisión 3 — Sobre qué se cobra la comisión** (campo en juego: *Qué hace*)
-- La IA propuso: cobrar el 10% solo sobre el subtotal de la renta, sin incluir el seguro.
-- **Mi decisión:** ___ **Por qué:** ___ ✍️
-
-**Decisión 4 — Funcionalidad extra no pedida** (campo en juego: *Qué hace*)
-- La IA agregó un link "Cotizar" en el menú de arriba, aunque no estaba en mi especificación.
-- **Mi decisión:** ___ **Por qué:** ___ ✍️
+- El mockup y la primera versión del cotizador usaban Ciudad $22, Playa $28, Off-Road $45 y seguro $5/día. Cuestioné esos precios y la IA propuso subirlos a $45 / $65 / $95 y $15 de seguro.
+- **Mi decisión:** Rechazar la propuesta de la IA → pedí precios más caros y quedaron en Ciudad $70, Playa $95, Off-Road $140 y seguro $25/día. **Por qué:** en la vida real rentar un coche no cuesta $28 USD al día, es mucho más caro; con precios irreales el cotizador daría totales que no le sirven a nadie.
 
 ---
 
 ## Paso 3 — Validación (antes de la S20)
 
-Deploy confirmado: ☐ sí, la página responde en https://aat-mockup-lauren.vercel.app/
+Deploy confirmado: ✅ sí, la página responde en https://aat-mockup-lauren.vercel.app/ (sección "Cotizar").
 
-**Input exacto:** ___ ✍️ (por ejemplo: Match Playa, inicio 01/12/2026, fin 04/12/2026)
+**Input exacto:** Match Playa ($95 USD/día), fecha de inicio 11/10/2026, fecha de fin 11/14/2026.
 
-**Output real (copiado y pegado de la página, sin resumir):**
+**Output real (copiado tal cual de la página):**
 ```
-(pegar aquí)
+Días de renta  4
+Subtotal (4 × $95)  $380.00 USD
+Seguro ($25/día)  $100.00 USD
+Comisión RentaGo (10%)  $38.00 USD
+Total  $518.00 USD
 ```
 
-**Veredicto:** Aceptar / Rechazar / Revisar ___
-**Razón (1-2 líneas, citando algo específico del output):** ___ ✍️
+**Resultado esperado según mi especificación:** 14 − 10 = 4 días → 4 × $95 = $380 + seguro 4 × $25 = $100 + comisión 10% de $380 = $38 → **$518 USD**.
+
+**Veredicto:** Aceptar.
+**Razón:** el output contó 4 días (no 5), así que respeta mi regla "días = fecha fin − fecha inicio", y la comisión salió en $38.00, que es el 10% solo del subtotal de $380; el total de $518.00 USD coincide exacto con el resultado esperado según mi especificación.
 
 ---
 
 ## Uso de IA
 
 - **Herramienta(s):** Claude (chat).
-- **Para qué la usé:** ___ ✍️ (por ejemplo: generar ideas de funciones, programar el cotizador y su estilo, armar la estructura de esta bitácora)
-- **Qué decidí o verifiqué yo:** ___ ✍️ (por ejemplo: la función elegida, la moneda, los valores de seguro y comisión, las decisiones del Paso 2 y la prueba real del Paso 3 en mi deploy)
+- **Para qué la usé:** proponer ideas de funciones, programar el cotizador (HTML/CSS/JavaScript), guiarme para subir los cambios a GitHub y ayudarme a redactar esta bitácora a partir de mis decisiones.
+- **Qué decidí o verifiqué yo:** elegí la función (cotizador), los inputs (tipo de auto + fechas) y que incluyera seguro y comisión; decidí la moneda (dólares) y rechacé los precios que propuso la IA por no ser realistas; hice la prueba real en mi deploy y revisé que el total coincidiera con el resultado esperado según mi especificación.
