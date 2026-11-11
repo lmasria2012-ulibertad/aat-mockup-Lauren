@@ -370,6 +370,93 @@
     font-weight: 600;
   }
 
+  .cuenta {
+    padding: 90px 40px;
+    text-align: center;
+  }
+
+  .cuenta h2 {
+    font-size: 2.2rem;
+    color: var(--azul-oscuro);
+    margin-bottom: 12px;
+  }
+
+  .cuenta > p {
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+  }
+
+  .cuenta .formularios {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  .cuenta form,
+  .cuenta .sesion {
+    background-color: var(--blanco);
+    width: 100%;
+    max-width: 400px;
+    padding: 36px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(11, 35, 64, 0.08);
+    border-top: 5px solid var(--turquesa);
+    text-align: left;
+  }
+
+  .cuenta .sesion {
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .cuenta h3 {
+    color: var(--azul-oscuro);
+    font-size: 1.35rem;
+    margin-bottom: 18px;
+  }
+
+  .cuenta label {
+    display: block;
+    font-weight: 600;
+    color: var(--azul-oscuro);
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  .cuenta input {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border: 1px solid #d8dee6;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--gris-texto);
+    background-color: var(--arena);
+  }
+
+  .cuenta input:focus {
+    outline: none;
+    border-color: var(--turquesa);
+  }
+
+  .cuenta .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  #mensaje-cuenta {
+    margin-top: 24px;
+    min-height: 1.6em;
+    color: #b42318;
+    font-weight: 600;
+  }
+
+  .cuenta [hidden] {
+    display: none !important;
+  }
+
   @media (max-width: 600px) {
     nav {
       flex-direction: column;
@@ -405,6 +492,45 @@
   <h1>Tu próximo auto rentado, listo antes de aterrizar</h1>
   <p>RentaGo conecta viajeros con dueños particulares verificados y usa un algoritmo inteligente para emparejarte con el auto ideal según tu tipo de viaje.</p>
   <a href="#como-funciona" class="btn-primary">Buscar mi auto ideal</a>
+</section>
+
+<section class="cuenta" id="cuenta">
+  <h2>Mi cuenta</h2>
+  <p>Crea tu cuenta o inicia sesión para rentar con RentaGo.</p>
+
+  <div class="formularios" id="formularios-cuenta">
+    <form id="form-registro">
+      <h3>Crear cuenta</h3>
+      <label for="registro-nombre">Nombre</label>
+      <input type="text" id="registro-nombre" placeholder="Tu nombre" required>
+
+      <label for="registro-email">Correo</label>
+      <input type="email" id="registro-email" placeholder="tu@correo.com" required>
+
+      <label for="registro-password">Contraseña</label>
+      <input type="password" id="registro-password" placeholder="Mínimo 6 caracteres" minlength="6" required>
+
+      <button type="submit" class="btn-primary">Crear cuenta</button>
+    </form>
+
+    <form id="form-login">
+      <h3>Iniciar sesión</h3>
+      <label for="login-email">Correo</label>
+      <input type="email" id="login-email" placeholder="tu@correo.com" required>
+
+      <label for="login-password">Contraseña</label>
+      <input type="password" id="login-password" placeholder="Tu contraseña" required>
+
+      <button type="submit" class="btn-primary">Iniciar sesión</button>
+    </form>
+  </div>
+
+  <div class="sesion" id="sesion-activa" hidden>
+    <h3 id="saludo"></h3>
+    <button type="button" class="btn-primary" id="btn-cerrar-sesion">Cerrar sesión</button>
+  </div>
+
+  <p id="mensaje-cuenta" aria-live="polite"></p>
 </section>
 
 <section class="servicios" id="como-funciona">
@@ -539,4 +665,110 @@
       '<tr class="total"><td>Total</td><td>' + usd(r.total) + '</td></tr>' +
       '</table>';
   });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Cuenta de usuario con Supabase Auth (correo y contraseña)
+  var SUPABASE_URL = 'https://ofblvxjgzqiqlliklmyh.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_Ir7uGS_3e2AlguAhRbIJlw_Ug3CN_Pr';
+  var clienteSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  var formRegistro = document.getElementById('form-registro');
+  var formLogin = document.getElementById('form-login');
+  var bloqueFormularios = document.getElementById('formularios-cuenta');
+  var bloqueSesion = document.getElementById('sesion-activa');
+  var saludo = document.getElementById('saludo');
+  var mensajeCuenta = document.getElementById('mensaje-cuenta');
+
+  function traducirError(error) {
+    var msg = (error && error.message) || 'Ocurrió un error. Intenta de nuevo.';
+    if (/already registered|already exists/i.test(msg)) return 'Ese correo ya está registrado.';
+    if (/invalid login credentials/i.test(msg)) return 'Correo o contraseña incorrectos.';
+    if (/at least 6 characters/i.test(msg)) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (/invalid.*email|email.*invalid/i.test(msg)) return 'El correo no es válido.';
+    return msg;
+  }
+
+  function mostrarSesion(nombre) {
+    saludo.textContent = 'Hola, ' + nombre;
+    bloqueFormularios.hidden = true;
+    bloqueSesion.hidden = false;
+    mensajeCuenta.textContent = '';
+  }
+
+  function mostrarFormularios() {
+    formRegistro.reset();
+    formLogin.reset();
+    bloqueSesion.hidden = true;
+    bloqueFormularios.hidden = false;
+  }
+
+  async function leerNombre(userId) {
+    var r = await clienteSupabase.from('perfiles').select('nombre').eq('id', userId).single();
+    if (r.error) throw r.error;
+    return r.data.nombre;
+  }
+
+  formRegistro.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var nombre = document.getElementById('registro-nombre').value.trim();
+    var email = document.getElementById('registro-email').value.trim();
+    var password = document.getElementById('registro-password').value;
+
+    if (password.length < 6) {
+      mensajeCuenta.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+      return;
+    }
+
+    var r = await clienteSupabase.auth.signUp({ email: email, password: password });
+    if (r.error) {
+      mensajeCuenta.textContent = traducirError(r.error);
+      return;
+    }
+
+    var ins = await clienteSupabase.from('perfiles').insert({ id: r.data.user.id, nombre: nombre });
+    if (ins.error) {
+      await clienteSupabase.auth.signOut();
+      mensajeCuenta.textContent = 'No se pudo guardar tu perfil: ' + ins.error.message;
+      return;
+    }
+    mostrarSesion(nombre);
+  });
+
+  formLogin.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var email = document.getElementById('login-email').value.trim();
+    var password = document.getElementById('login-password').value;
+
+    var r = await clienteSupabase.auth.signInWithPassword({ email: email, password: password });
+    if (r.error) {
+      mensajeCuenta.textContent = traducirError(r.error);
+      return;
+    }
+
+    try {
+      mostrarSesion(await leerNombre(r.data.user.id));
+    } catch (err) {
+      await clienteSupabase.auth.signOut();
+      mensajeCuenta.textContent = 'No se pudo leer tu perfil: ' + err.message;
+    }
+  });
+
+  document.getElementById('btn-cerrar-sesion').addEventListener('click', async function () {
+    await clienteSupabase.auth.signOut();
+    mostrarFormularios();
+  });
+
+  // Al recargar la página, recuperar la sesión guardada
+  (async function () {
+    var r = await clienteSupabase.auth.getSession();
+    var sesion = r.data.session;
+    if (!sesion) return;
+    try {
+      mostrarSesion(await leerNombre(sesion.user.id));
+    } catch (err) {
+      mensajeCuenta.textContent = 'No se pudo leer tu perfil: ' + err.message;
+    }
+  })();
 </script>
