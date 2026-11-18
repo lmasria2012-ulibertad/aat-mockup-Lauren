@@ -631,11 +631,24 @@
     return Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
   }
 
+  function fechaDeHoy() {
+    var d = new Date();
+    var mes = String(d.getMonth() + 1).padStart(2, '0');
+    var dia = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mes + '-' + dia;
+  }
+
+  document.getElementById('fecha-inicio').min = fechaDeHoy();
+  document.getElementById('fecha-fin').min = fechaDeHoy();
+
   function usd(n) {
     return '$' + n.toFixed(2) + ' USD';
   }
 
   function calcularCotizacion(precioDia, inicio, fin) {
+    if (aFechaUTC(inicio) < aFechaUTC(fechaDeHoy())) {
+      return { error: 'La fecha de inicio no puede ser anterior a hoy.' };
+    }
     var dias = Math.round((aFechaUTC(fin) - aFechaUTC(inicio)) / 86400000);
     if (dias < 1) {
       return { error: 'La fecha de fin debe ser posterior a la fecha de inicio.' };
@@ -706,10 +719,18 @@
     bloqueFormularios.hidden = false;
   }
 
-  async function leerNombre(userId) {
-    var r = await clienteSupabase.from('perfiles').select('nombre').eq('id', userId).single();
+  // Lee el perfil. Si la cuenta se creó pero su perfil no se guardó, lo crea ahora
+  // para que esa persona no se quede sin poder entrar.
+  async function leerNombre(usuario) {
+    var r = await clienteSupabase.from('perfiles').select('nombre').eq('id', usuario.id).maybeSingle();
     if (r.error) throw r.error;
-    return r.data.nombre;
+    if (r.data) return r.data.nombre;
+
+    var datos = usuario.user_metadata || {};
+    var nombre = datos.nombre || usuario.email.split('@')[0];
+    var ins = await clienteSupabase.from('perfiles').insert({ id: usuario.id, nombre: nombre });
+    if (ins.error) throw ins.error;
+    return nombre;
   }
 
   formRegistro.addEventListener('submit', async function (e) {
@@ -723,7 +744,11 @@
       return;
     }
 
-    var r = await clienteSupabase.auth.signUp({ email: email, password: password });
+    var r = await clienteSupabase.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { nombre: nombre } }
+    });
     if (r.error) {
       mensajeCuenta.textContent = traducirError(r.error);
       return;
@@ -750,7 +775,7 @@
     }
 
     try {
-      mostrarSesion(await leerNombre(r.data.user.id));
+      mostrarSesion(await leerNombre(r.data.user));
     } catch (err) {
       await clienteSupabase.auth.signOut();
       mensajeCuenta.textContent = 'No se pudo leer tu perfil: ' + err.message;
@@ -800,7 +825,7 @@
     var sesion = r.data.session;
     if (!sesion) return;
     try {
-      mostrarSesion(await leerNombre(sesion.user.id));
+      mostrarSesion(await leerNombre(sesion.user));
     } catch (err) {
       mensajeCuenta.textContent = 'No se pudo leer tu perfil: ' + err.message;
     }
