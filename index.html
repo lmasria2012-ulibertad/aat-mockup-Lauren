@@ -1,3 +1,8 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RentaGo</title>
 <style>
   :root {
@@ -457,7 +462,173 @@
     display: none !important;
   }
 
+  .autos,
+  .publicar {
+    padding: 90px 40px;
+    text-align: center;
+  }
+
+  .autos h2,
+  .publicar h2 {
+    font-size: 2.2rem;
+    color: var(--azul-oscuro);
+    margin-bottom: 12px;
+  }
+
+  .autos > p,
+  .publicar > p {
+    max-width: 600px;
+    margin: 0 auto 24px auto;
+  }
+
+  .lista-autos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 16px;
+  }
+
+  .auto-card {
+    background-color: var(--blanco);
+    border-radius: 14px;
+    width: 300px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(11, 35, 64, 0.08);
+    text-align: left;
+  }
+
+  .auto-card img {
+    display: block;
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    background-color: var(--arena);
+  }
+
+  .auto-card .contenido {
+    padding: 20px;
+  }
+
+  .auto-card h3 {
+    color: var(--azul-oscuro);
+    font-size: 1.2rem;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;
+  }
+
+  .auto-card .detalle {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+  }
+
+  .auto-card .precio {
+    color: var(--naranja);
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .auto-card button {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+
+  .auto-card .btn-borrar {
+    background: none;
+    color: #b42318;
+    font-weight: 600;
+    margin-top: 12px;
+    padding: 6px;
+  }
+
+  .publicar {
+    background-color: var(--blanco);
+  }
+
+  .aviso-publicar {
+    font-weight: 600;
+  }
+
+  .aviso-publicar a {
+    color: var(--azul);
+  }
+
+  .publicar form {
+    background-color: var(--arena);
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 36px;
+    border-radius: 14px;
+    border-top: 5px solid var(--turquesa);
+    text-align: left;
+  }
+
+  .publicar label {
+    display: block;
+    font-weight: 600;
+    color: var(--azul-oscuro);
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+
+  .publicar input,
+  .publicar select {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border: 1px solid #d8dee6;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--gris-texto);
+    background-color: var(--blanco);
+  }
+
+  .publicar input:focus,
+  .publicar select:focus {
+    outline: none;
+    border-color: var(--turquesa);
+  }
+
+  .publicar .btn-primary {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .publicar .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  #estado-publicar {
+    margin-top: 16px;
+    min-height: 1.6em;
+    font-weight: 600;
+  }
+
+  .publicar [hidden] {
+    display: none !important;
+  }
+
   @media (max-width: 600px) {
+    .autos,
+    .publicar {
+      padding: 70px 20px;
+    }
+
+    .publicar form {
+      padding: 24px;
+    }
+
     nav {
       flex-direction: column;
       gap: 14px;
@@ -483,6 +654,7 @@
   <ul>
     <li><a href="#inicio">Inicio</a></li>
     <li><a href="#como-funciona">Cómo funciona</a></li>
+    <li><a href="#autos">Autos</a></li>
     <li><a href="#cotizador">Cotizar</a></li>
     <li><a href="#contacto">Contacto</a></li>
   </ul>
@@ -558,6 +730,13 @@
   </div>
 </section>
 
+<section class="autos" id="autos">
+  <h2>Autos disponibles</h2>
+  <p>Conoce los autos que los dueños ya publicaron en RentaGo.</p>
+  <p id="estado-autos" aria-live="polite"></p>
+  <div class="lista-autos" id="lista-autos"></div>
+</section>
+
 <section class="cotizador" id="cotizador">
   <h2>Cotiza tu renta</h2>
   <p>Elige tu tipo de auto y tus fechas, y te mostramos cuánto vas a pagar en total, sin sorpresas.</p>
@@ -585,7 +764,39 @@
     <div class="beneficio">🛡️ Verificación de identidad de cada arrendatario</div>
     <div class="beneficio">📄 Contrato digital para cada renta</div>
   </div>
-  <a href="#contacto" class="btn-primary">Registra tu auto</a>
+  <a href="#publicar" class="btn-primary">Registra tu auto</a>
+</section>
+
+<section class="publicar" id="publicar">
+  <h2>Publica tu auto</h2>
+  <p>Agrega los datos y una foto para que los viajeros lo encuentren.</p>
+
+  <p class="aviso-publicar" id="aviso-publicar">Para publicar tu auto, primero <a href="#cuenta">crea tu cuenta o inicia sesión</a>.</p>
+
+  <form id="form-auto" hidden>
+    <label for="auto-titulo">Marca, modelo y año</label>
+    <input type="text" id="auto-titulo" placeholder="Ej. Toyota Corolla 2022" minlength="3" maxlength="80" required>
+
+    <label for="auto-tipo">Tipo de auto</label>
+    <select id="auto-tipo" required>
+      <option value="Match Playa">Match Playa</option>
+      <option value="Match Ciudad">Match Ciudad</option>
+      <option value="Match Off-Road">Match Off-Road</option>
+    </select>
+
+    <label for="auto-ciudad">Ciudad</label>
+    <input type="text" id="auto-ciudad" placeholder="Ej. Cancún" minlength="2" maxlength="60" required>
+
+    <label for="auto-precio">Precio por día (USD)</label>
+    <input type="number" id="auto-precio" placeholder="Ej. 80" min="1" max="2000" step="1" required>
+
+    <label for="auto-foto">Foto del auto (JPG, PNG o WebP, máximo 5 MB)</label>
+    <input type="file" id="auto-foto" accept="image/jpeg,image/png,image/webp" required>
+
+    <button type="submit" class="btn-primary" id="btn-publicar">Publicar auto</button>
+
+    <p id="estado-publicar" aria-live="polite"></p>
+  </form>
 </section>
 
 <section class="contacto" id="contacto">
@@ -816,6 +1027,161 @@
       estadoContacto.textContent = 'No se pudo enviar tu mensaje. Revisa tus datos e intenta de nuevo.';
     } finally {
       btnContacto.disabled = false;
+    }
+  });
+
+  // Autos: los dueños con sesión publican su auto con foto y todos pueden verlos.
+  var BUCKET_FOTOS = 'fotos-autos';
+  var TAMANO_MAXIMO_FOTO = 5 * 1024 * 1024;
+  var EXTENSIONES_FOTO = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+
+  var listaAutos = document.getElementById('lista-autos');
+  var estadoAutos = document.getElementById('estado-autos');
+  var formAuto = document.getElementById('form-auto');
+  var avisoPublicar = document.getElementById('aviso-publicar');
+  var btnPublicar = document.getElementById('btn-publicar');
+  var estadoPublicar = document.getElementById('estado-publicar');
+  var usuarioActual = null;
+  var autosYaCargados = false;
+
+  function urlDeFoto(ruta) {
+    return clienteSupabase.storage.from(BUCKET_FOTOS).getPublicUrl(ruta).data.publicUrl;
+  }
+
+  function crearElemento(etiqueta, clase, texto) {
+    var el = document.createElement(etiqueta);
+    if (clase) el.className = clase;
+    if (texto) el.textContent = texto;
+    return el;
+  }
+
+  function cotizarAuto(auto) {
+    var opcion = selectAuto.querySelector('option[data-auto-id="' + auto.id + '"]');
+    if (!opcion) {
+      opcion = document.createElement('option');
+      opcion.dataset.autoId = auto.id;
+      opcion.value = auto.precio_dia;
+      opcion.textContent = auto.titulo + ' ($' + auto.precio_dia + ' USD/día)';
+      selectAuto.appendChild(opcion);
+    }
+    opcion.selected = true;
+    document.getElementById('resultado-cotizacion').textContent = '';
+    document.getElementById('cotizador').scrollIntoView();
+  }
+
+  async function borrarAuto(auto) {
+    if (!window.confirm('¿Quieres borrar este auto de RentaGo?')) return;
+
+    var r = await clienteSupabase.from('autos').delete().eq('id', auto.id);
+    if (r.error) {
+      estadoAutos.textContent = 'No se pudo borrar el auto. Intenta de nuevo.';
+      return;
+    }
+    await clienteSupabase.storage.from(BUCKET_FOTOS).remove([auto.foto_path]);
+    await cargarAutos();
+  }
+
+  function crearTarjetaAuto(auto) {
+    var tarjeta = crearElemento('article', 'auto-card');
+
+    var foto = document.createElement('img');
+    foto.src = urlDeFoto(auto.foto_path);
+    foto.alt = 'Foto de ' + auto.titulo;
+    foto.loading = 'lazy';
+    tarjeta.appendChild(foto);
+
+    var contenido = crearElemento('div', 'contenido');
+    contenido.appendChild(crearElemento('h3', '', auto.titulo));
+    contenido.appendChild(crearElemento('p', 'detalle', auto.tipo + ' · ' + auto.ciudad));
+    contenido.appendChild(crearElemento('p', 'precio', '$' + auto.precio_dia + ' USD/día'));
+
+    var btnCotizar = crearElemento('button', 'btn-primary', 'Cotizar este auto');
+    btnCotizar.type = 'button';
+    btnCotizar.addEventListener('click', function () { cotizarAuto(auto); });
+    contenido.appendChild(btnCotizar);
+
+    if (usuarioActual && usuarioActual.id === auto.dueno_id) {
+      var btnBorrar = crearElemento('button', 'btn-borrar', 'Borrar mi auto');
+      btnBorrar.type = 'button';
+      btnBorrar.addEventListener('click', function () { borrarAuto(auto); });
+      contenido.appendChild(btnBorrar);
+    }
+
+    tarjeta.appendChild(contenido);
+    return tarjeta;
+  }
+
+  async function cargarAutos() {
+    estadoAutos.textContent = 'Cargando autos...';
+    var r = await clienteSupabase.from('autos').select('*').order('creado_en', { ascending: false }).limit(24);
+
+    if (r.error) {
+      estadoAutos.textContent = 'No se pudieron cargar los autos. Intenta de nuevo más tarde.';
+      return;
+    }
+
+    listaAutos.replaceChildren.apply(listaAutos, r.data.map(crearTarjetaAuto));
+    estadoAutos.textContent = r.data.length ? '' : 'Todavía no hay autos publicados. ¡Publica el primero!';
+  }
+
+  formAuto.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!usuarioActual) return;
+
+    var archivo = document.getElementById('auto-foto').files[0];
+    var extension = archivo && EXTENSIONES_FOTO[archivo.type];
+
+    if (!extension) {
+      estadoPublicar.textContent = 'Elige una foto en formato JPG, PNG o WebP.';
+      return;
+    }
+    if (archivo.size > TAMANO_MAXIMO_FOTO) {
+      estadoPublicar.textContent = 'La foto pesa más de 5 MB. Elige una más ligera.';
+      return;
+    }
+
+    btnPublicar.disabled = true;
+    estadoPublicar.textContent = 'Publicando tu auto...';
+
+    var ruta = usuarioActual.id + '/' + crypto.randomUUID() + '.' + extension;
+
+    try {
+      var subida = await clienteSupabase.storage.from(BUCKET_FOTOS).upload(ruta, archivo, { contentType: archivo.type });
+      if (subida.error) throw subida.error;
+
+      var ins = await clienteSupabase.from('autos').insert({
+        titulo: document.getElementById('auto-titulo').value.trim(),
+        tipo: document.getElementById('auto-tipo').value,
+        ciudad: document.getElementById('auto-ciudad').value.trim(),
+        precio_dia: Number(document.getElementById('auto-precio').value),
+        foto_path: ruta
+      });
+      if (ins.error) {
+        await clienteSupabase.storage.from(BUCKET_FOTOS).remove([ruta]);
+        throw ins.error;
+      }
+
+      formAuto.reset();
+      estadoPublicar.textContent = '¡Listo! Tu auto ya está publicado.';
+      await cargarAutos();
+    } catch (err) {
+      estadoPublicar.textContent = 'No se pudo publicar tu auto. Revisa tus datos e intenta de nuevo.';
+    } finally {
+      btnPublicar.disabled = false;
+    }
+  });
+
+  clienteSupabase.auth.onAuthStateChange(function (evento, sesion) {
+    var usuario = sesion ? sesion.user : null;
+    var cambioUsuario = (usuario && usuario.id) !== (usuarioActual && usuarioActual.id);
+    usuarioActual = usuario;
+
+    formAuto.hidden = !usuario;
+    avisoPublicar.hidden = !!usuario;
+
+    if (cambioUsuario || !autosYaCargados) {
+      autosYaCargados = true;
+      setTimeout(cargarAutos, 0);
     }
   });
 
