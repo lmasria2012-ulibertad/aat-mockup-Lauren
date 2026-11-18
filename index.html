@@ -591,17 +591,19 @@
 <section class="contacto" id="contacto">
   <h2>Contacto</h2>
   <p>¿Tienes dudas o quieres más información sobre RentaGo? Escríbenos y te responderemos pronto.</p>
-  <form>
+  <form id="form-contacto">
     <label for="nombre">Nombre</label>
-    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+    <input type="text" id="nombre" placeholder="Tu nombre" maxlength="100" required>
 
     <label for="email">Email</label>
-    <input type="email" id="email" name="email" placeholder="tu@correo.com" required>
+    <input type="email" id="email" placeholder="tu@correo.com" maxlength="254" required>
 
     <label for="mensaje">Mensaje</label>
-    <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos en qué te podemos ayudar" required></textarea>
+    <textarea id="mensaje" placeholder="Cuéntanos en qué te podemos ayudar" maxlength="2000" required></textarea>
 
-    <button type="submit" class="btn-primary">Enviar mensaje</button>
+    <button type="submit" class="btn-primary" id="btn-contacto">Enviar mensaje</button>
+
+    <p id="estado-contacto" aria-live="polite"></p>
   </form>
 </section>
 
@@ -758,6 +760,38 @@
   document.getElementById('btn-cerrar-sesion').addEventListener('click', async function () {
     await clienteSupabase.auth.signOut();
     mostrarFormularios();
+  });
+
+  // Formulario de contacto: guarda el mensaje en Supabase.
+  // Los campos no llevan "name" para que sus datos nunca aparezcan en la URL.
+  var formContacto = document.getElementById('form-contacto');
+  var btnContacto = document.getElementById('btn-contacto');
+  var estadoContacto = document.getElementById('estado-contacto');
+
+  formContacto.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var nombre = document.getElementById('nombre').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var mensaje = document.getElementById('mensaje').value.trim();
+
+    if (!nombre || !mensaje) {
+      estadoContacto.textContent = 'Escribe tu nombre y tu mensaje.';
+      return;
+    }
+
+    btnContacto.disabled = true;
+    estadoContacto.textContent = 'Enviando...';
+
+    try {
+      var r = await clienteSupabase.from('mensajes_contacto').insert({ nombre: nombre, email: email, mensaje: mensaje });
+      if (r.error) throw r.error;
+      formContacto.reset();
+      estadoContacto.textContent = '¡Gracias! Recibimos tu mensaje.';
+    } catch (err) {
+      estadoContacto.textContent = 'No se pudo enviar tu mensaje. Revisa tus datos e intenta de nuevo.';
+    } finally {
+      btnContacto.disabled = false;
+    }
   });
 
   // Al recargar la página, recuperar la sesión guardada
