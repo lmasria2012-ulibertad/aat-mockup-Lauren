@@ -8,13 +8,17 @@ RentaGo es una plataforma de renta de autos entre personas: conecta a viajeros c
 
 - **Cotizador de renta:** calcula días, subtotal, seguro, comisión y total en USD.
 - **Cuentas de usuario:** registro, inicio de sesión y cierre de sesión con Supabase Auth.
+- **Publicación de autos:** los dueños con sesión publican su auto con foto y zona aproximada.
+- **Catálogo de autos:** cualquier visitante puede ver los autos publicados y cotizarlos.
+- **Autos cerca de mí:** con permiso de ubicación, muestra en un mapa los autos cercanos y los ordena por distancia.
 - **Formulario de contacto:** guarda los mensajes en Supabase.
 
 ## Herramientas
 
 - HTML, CSS y JavaScript
 - Vercel (hosting)
-- Supabase (cuentas y base de datos)
+- Supabase (cuentas, base de datos y fotos)
+- Leaflet y OpenStreetMap (mapa)
 - GitHub Actions (tarea que mantiene activo el proyecto de Supabase)
 
 ## Decisiones de diseño vs. sugerencias del IS
@@ -32,3 +36,10 @@ RentaGo es una plataforma de renta de autos entre personas: conecta a viajeros c
 - **Qué decidí:** rechazar la propuesta y pedir precios más altos. Quedaron en Ciudad $70, Playa $95, Off-Road $140 y seguro de $25.
 - **Por qué:** en la vida real rentar un coche no cuesta $28 USD al día, es mucho más caro; con precios irreales el cotizador daría totales que no le sirven a nadie.
 - **Cómo lo verifiqué:** probé Match Playa del 10 al 14 de noviembre en mi app publicada. Dio 4 días y un total de $518 USD, igual al resultado que yo esperaba.
+
+### Decisión 3: ubicación de los autos en el mapa (seguridad)
+
+- **Qué propuso el IS:** 2 opciones: mostrar la ubicación exacta del auto o una zona aproximada de alrededor de 1 km. Me recomendó la zona aproximada.
+- **Qué decidí:** aceptar la zona aproximada y rechazar la ubicación exacta.
+- **Por qué:** quiero proteger siempre la casa y la información personal de la persona que renta su coche, para que tenga seguridad.
+- **Cómo lo verifiqué:** publiqué un auto de prueba con mi ubicación y comprobé que apareciera en el mapa al usar **Buscar autos cerca de mí**.
