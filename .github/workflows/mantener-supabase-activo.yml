@@ -1,0 +1,29 @@
+# Decisión de escalabilidad: el plan Free de Supabase pausa el proyecto tras
+# 1 semana sin actividad, y eso deja sin login a RentaGo. Esta tarea hace una
+# consulta cada 3 días para que la base de datos tenga actividad.
+name: Mantener Supabase activo
+
+on:
+  schedule:
+    - cron: "17 15 */3 * *" # Cada 3 días, 15:17 UTC
+  workflow_dispatch: # Permite correrla a mano desde la pestaña Actions
+
+permissions: {}
+
+jobs:
+  consultar-supabase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      # Son los mismos valores públicos que ya usa index.html. RLS protege los datos.
+      SUPABASE_URL: https://ofblvxjgzqiqlliklmyh.supabase.co
+      SUPABASE_KEY: sb_publishable_Ir7uGS_3e2AlguAhRbIJlw_Ug3CN_Pr
+    steps:
+      - name: Consultar la tabla perfiles
+        run: |
+          codigo=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+            --retry 3 --retry-delay 20 --max-time 60 \
+            --header "apikey: $SUPABASE_KEY" \
+            "$SUPABASE_URL/rest/v1/perfiles?select=id&limit=1")
+          echo "Supabase respondió: $codigo"
+          test "$codigo" = "200"
