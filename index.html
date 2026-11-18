@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RentaGo</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 <style>
   :root {
     --azul-oscuro: #0b2340;
@@ -481,6 +482,64 @@
     margin: 0 auto 24px auto;
   }
 
+  .nota-mapa {
+    font-size: 0.9rem;
+  }
+
+  .autos .nota-mapa {
+    max-width: 560px;
+    margin: 12px auto 24px auto;
+  }
+
+  .autos #btn-cerca {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+
+  .mapa {
+    position: relative;
+    z-index: 0;
+    width: 100%;
+    max-width: 960px;
+    height: 420px;
+    margin: 0 auto 24px auto;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .mapa[hidden] {
+    display: none;
+  }
+
+  .mapa-publicar {
+    height: 260px;
+    margin: 8px 0 12px 0;
+  }
+
+  .btn-secundario {
+    display: block;
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    background-color: var(--blanco);
+    border: 1px solid var(--azul);
+    border-radius: 8px;
+    color: var(--azul);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .auto-card .distancia {
+    color: var(--azul);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
   .lista-autos {
     display: flex;
     flex-wrap: wrap;
@@ -733,6 +792,9 @@
 <section class="autos" id="autos">
   <h2>Autos disponibles</h2>
   <p>Conoce los autos que los dueños ya publicaron en RentaGo.</p>
+  <button type="button" class="btn-primary" id="btn-cerca">Buscar autos cerca de mí</button>
+  <p class="nota-mapa">Tu ubicación solo se usa en este navegador y RentaGo no la guarda. Los autos aparecen en una zona aproximada para proteger a sus dueños.</p>
+  <div class="mapa" id="mapa-autos" hidden></div>
   <p id="estado-autos" aria-live="polite"></p>
   <div class="lista-autos" id="lista-autos"></div>
 </section>
@@ -789,6 +851,11 @@
 
     <label for="auto-precio">Precio por día (USD)</label>
     <input type="number" id="auto-precio" placeholder="Ej. 80" min="1" max="2000" step="1" required>
+
+    <label>Zona del auto</label>
+    <p class="nota-mapa">Da clic en el mapa cerca de donde está tu auto. Solo guardamos una zona aproximada de alrededor de 1 km, nunca tu dirección exacta.</p>
+    <div class="mapa mapa-publicar" id="mapa-publicar"></div>
+    <button type="button" class="btn-secundario" id="btn-mi-zona">Usar mi ubicación</button>
 
     <label for="auto-foto">Foto del auto (JPG, PNG o WebP, máximo 5 MB)</label>
     <input type="file" id="auto-foto" accept="image/jpeg,image/png,image/webp" required>
@@ -893,6 +960,7 @@
   });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // Cuenta de usuario con Supabase Auth (correo y contraseña)
@@ -1043,6 +1111,136 @@
   var estadoPublicar = document.getElementById('estado-publicar');
   var usuarioActual = null;
   var autosYaCargados = false;
+  var autosCargados = [];
+  var ubicacionViajero = null;
+  var zonaAuto = null;
+  var mapaAutos = null;
+  var capaAutos = null;
+  var mapaPublicar = null;
+  var marcaZona = null;
+  var RADIO_MARCA_PIXELES = 13;
+  var CAPA_MAPA = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  var CREDITO_MAPA = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+  // Redondea a 2 decimales (alrededor de 1 km) antes de que el dato salga del navegador.
+  function redondearZona(valor) {
+    return Math.round(valor * 100) / 100;
+  }
+
+  function distanciaKm(a, b) {
+    var radianes = Math.PI / 180;
+    var dLat = (b.lat - a.lat) * radianes;
+    var dLng = (b.lng - a.lng) * radianes;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(a.lat * radianes) * Math.cos(b.lat * radianes) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  }
+
+  function tieneZona(auto) {
+    return auto.lat !== null && auto.lat !== undefined && auto.lng !== null && auto.lng !== undefined;
+  }
+
+  function distanciaDeAuto(auto) {
+    if (!ubicacionViajero || !tieneZona(auto)) return Infinity;
+    return distanciaKm(ubicacionViajero, { lat: Number(auto.lat), lng: Number(auto.lng) });
+  }
+
+  function pedirUbicacion(alObtener, alFallar) {
+    if (!navigator.geolocation) {
+      alFallar('Tu navegador no permite usar la ubicación.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(function (posicion) {
+      alObtener({ lat: posicion.coords.latitude, lng: posicion.coords.longitude });
+    }, function (error) {
+      alFallar(error.code === 1
+        ? 'Necesitamos tu permiso de ubicación. Actívalo en tu navegador e intenta de nuevo.'
+        : 'No pudimos encontrar tu ubicación. Intenta de nuevo.');
+    }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+  }
+
+  function crearPopupAuto(auto) {
+    var popup = document.createElement('div');
+    popup.appendChild(crearElemento('strong', '', auto.titulo));
+    popup.appendChild(crearElemento('div', '', '$' + auto.precio_dia + ' USD/día'));
+    popup.appendChild(crearElemento('div', '', 'Zona aproximada'));
+    return popup;
+  }
+
+  function dibujarMapaAutos() {
+    if (!ubicacionViajero || !window.L) return;
+
+    var contenedor = document.getElementById('mapa-autos');
+    contenedor.hidden = false;
+
+    if (!mapaAutos) {
+      mapaAutos = L.map(contenedor);
+      L.tileLayer(CAPA_MAPA, { maxZoom: 19, attribution: CREDITO_MAPA }).addTo(mapaAutos);
+      capaAutos = L.layerGroup().addTo(mapaAutos);
+    }
+    mapaAutos.invalidateSize();
+    capaAutos.clearLayers();
+
+    var centro = [ubicacionViajero.lat, ubicacionViajero.lng];
+    L.circleMarker(centro, { radius: 9, color: '#ffffff', weight: 3, fillColor: '#114b7f', fillOpacity: 1 })
+      .bindPopup('Estás aquí').addTo(capaAutos);
+
+    var cercanos = autosCargados.filter(tieneZona).sort(function (a, b) {
+      return distanciaDeAuto(a) - distanciaDeAuto(b);
+    });
+
+    cercanos.forEach(function (auto) {
+      L.circleMarker([Number(auto.lat), Number(auto.lng)], {
+        radius: RADIO_MARCA_PIXELES, color: '#e07a3f', weight: 2, fillColor: '#e07a3f', fillOpacity: 0.45
+      }).bindPopup(crearPopupAuto(auto)).addTo(capaAutos);
+    });
+
+    var puntos = [centro].concat(cercanos.slice(0, 5).map(function (auto) {
+      return [Number(auto.lat), Number(auto.lng)];
+    }));
+    if (puntos.length > 1) {
+      mapaAutos.fitBounds(puntos, { padding: [40, 40], maxZoom: 13 });
+    } else {
+      mapaAutos.setView(centro, 12);
+    }
+  }
+
+  function marcarZonaAuto(lat, lng) {
+    zonaAuto = { lat: redondearZona(lat), lng: redondearZona(lng) };
+    var punto = [zonaAuto.lat, zonaAuto.lng];
+    if (marcaZona) {
+      marcaZona.setLatLng(punto);
+    } else {
+      marcaZona = L.circleMarker(punto, { radius: RADIO_MARCA_PIXELES, color: '#e07a3f', weight: 2, fillColor: '#e07a3f', fillOpacity: 0.45 }).addTo(mapaPublicar);
+    }
+    mapaPublicar.setView(punto, Math.max(mapaPublicar.getZoom(), 12));
+    estadoPublicar.textContent = 'Zona marcada.';
+  }
+
+  function limpiarZonaAuto() {
+    zonaAuto = null;
+    if (marcaZona) {
+      marcaZona.remove();
+      marcaZona = null;
+    }
+  }
+
+  function prepararMapaPublicar() {
+    if (!window.L) {
+      estadoPublicar.textContent = 'No se pudo cargar el mapa. Recarga la página.';
+      return;
+    }
+    if (mapaPublicar) {
+      mapaPublicar.invalidateSize();
+      return;
+    }
+    mapaPublicar = L.map('mapa-publicar').setView([23.6, -102.5], 4);
+    L.tileLayer(CAPA_MAPA, { maxZoom: 19, attribution: CREDITO_MAPA }).addTo(mapaPublicar);
+    mapaPublicar.on('click', function (e) {
+      marcarZonaAuto(e.latlng.lat, e.latlng.lng);
+    });
+  }
 
   function urlDeFoto(ruta) {
     return clienteSupabase.storage.from(BUCKET_FOTOS).getPublicUrl(ruta).data.publicUrl;
@@ -1093,6 +1291,12 @@
     var contenido = crearElemento('div', 'contenido');
     contenido.appendChild(crearElemento('h3', '', auto.titulo));
     contenido.appendChild(crearElemento('p', 'detalle', auto.tipo + ' · ' + auto.ciudad));
+
+    var distancia = distanciaDeAuto(auto);
+    if (distancia !== Infinity) {
+      contenido.appendChild(crearElemento('p', 'distancia', 'A unos ' + Math.max(1, Math.round(distancia)) + ' km de ti'));
+    }
+
     contenido.appendChild(crearElemento('p', 'precio', '$' + auto.precio_dia + ' USD/día'));
 
     var btnCotizar = crearElemento('button', 'btn-primary', 'Cotizar este auto');
@@ -1113,16 +1317,64 @@
 
   async function cargarAutos() {
     estadoAutos.textContent = 'Cargando autos...';
-    var r = await clienteSupabase.from('autos').select('*').order('creado_en', { ascending: false }).limit(24);
+    var r = await clienteSupabase.from('autos').select('*').order('creado_en', { ascending: false }).limit(100);
 
     if (r.error) {
       estadoAutos.textContent = 'No se pudieron cargar los autos. Intenta de nuevo más tarde.';
       return;
     }
 
-    listaAutos.replaceChildren.apply(listaAutos, r.data.map(crearTarjetaAuto));
-    estadoAutos.textContent = r.data.length ? '' : 'Todavía no hay autos publicados. ¡Publica el primero!';
+    autosCargados = r.data;
+    mostrarAutos();
   }
+
+  function mostrarAutos() {
+    var ordenados = autosCargados.slice();
+    if (ubicacionViajero) {
+      ordenados.sort(function (a, b) {
+        var da = distanciaDeAuto(a);
+        var db = distanciaDeAuto(b);
+        if (da === db) return 0;
+        return da < db ? -1 : 1;
+      });
+    }
+
+    listaAutos.replaceChildren.apply(listaAutos, ordenados.map(crearTarjetaAuto));
+    dibujarMapaAutos();
+
+    if (!autosCargados.length) {
+      estadoAutos.textContent = 'Todavía no hay autos publicados. ¡Publica el primero!';
+    } else if (ubicacionViajero && !autosCargados.some(tieneZona)) {
+      estadoAutos.textContent = 'Todavía no hay autos con zona marcada en el mapa.';
+    } else {
+      estadoAutos.textContent = '';
+    }
+  }
+
+  var btnCerca = document.getElementById('btn-cerca');
+  btnCerca.addEventListener('click', function () {
+    btnCerca.disabled = true;
+    estadoAutos.textContent = 'Buscando tu ubicación...';
+    pedirUbicacion(function (ubicacion) {
+      ubicacionViajero = ubicacion;
+      btnCerca.disabled = false;
+      mostrarAutos();
+    }, function (mensaje) {
+      btnCerca.disabled = false;
+      estadoAutos.textContent = mensaje;
+    });
+  });
+
+  document.getElementById('btn-mi-zona').addEventListener('click', function () {
+    estadoPublicar.textContent = 'Buscando tu ubicación...';
+    pedirUbicacion(function (ubicacion) {
+      prepararMapaPublicar();
+      if (!mapaPublicar) return;
+      marcarZonaAuto(ubicacion.lat, ubicacion.lng);
+    }, function (mensaje) {
+      estadoPublicar.textContent = mensaje;
+    });
+  });
 
   formAuto.addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -1140,6 +1392,11 @@
       return;
     }
 
+    if (!zonaAuto) {
+      estadoPublicar.textContent = 'Marca en el mapa la zona donde está tu auto.';
+      return;
+    }
+
     btnPublicar.disabled = true;
     estadoPublicar.textContent = 'Publicando tu auto...';
 
@@ -1154,7 +1411,9 @@
         tipo: document.getElementById('auto-tipo').value,
         ciudad: document.getElementById('auto-ciudad').value.trim(),
         precio_dia: Number(document.getElementById('auto-precio').value),
-        foto_path: ruta
+        foto_path: ruta,
+        lat: zonaAuto.lat,
+        lng: zonaAuto.lng
       });
       if (ins.error) {
         await clienteSupabase.storage.from(BUCKET_FOTOS).remove([ruta]);
@@ -1162,6 +1421,7 @@
       }
 
       formAuto.reset();
+      limpiarZonaAuto();
       estadoPublicar.textContent = '¡Listo! Tu auto ya está publicado.';
       await cargarAutos();
     } catch (err) {
@@ -1178,6 +1438,7 @@
 
     formAuto.hidden = !usuario;
     avisoPublicar.hidden = !!usuario;
+    if (usuario) setTimeout(prepararMapaPublicar, 0);
 
     if (cambioUsuario || !autosYaCargados) {
       autosYaCargados = true;
